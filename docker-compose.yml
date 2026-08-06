@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dentalsys_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dentalsys
+      POSTGRES_PASSWORD: dentalsys
+      POSTGRES_DB: dentalsys
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dentalsys"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./server
+    container_name: dentalsys_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://dentalsys:dentalsys@db:5432/dentalsys?schema=public
+      JWT_SECRET: troque-este-segredo-em-producao
+      PORT: 3333
+      WHATSAPP_API_URL:
+      WHATSAPP_API_TOKEN:
+      WHATSAPP_INSTANCE:
+    ports:
+      - "3333:3333"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npm run dev"
+
+  web:
+    build:
+      context: ./client
+    container_name: dentalsys_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: http://localhost:3333
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

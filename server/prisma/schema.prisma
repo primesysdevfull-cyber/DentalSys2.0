@@ -1,0 +1,590 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Cargo {
+  administrador
+  dentista
+  recepcionista
+}
+
+model Clinica {
+  id           String   @id @default(uuid())
+  nome         String
+  cnpj         String   @unique
+  email        String   @unique
+  telefone     String?
+  endereco     String?
+  razaoSocial  String?
+  responsavel  String?
+  logoUrl      String?
+  ativa        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuarios      Usuario[]
+  pacientes     Paciente[]
+  profissionais Profissional[]
+  procedimentos Procedimento[]
+  convenios     Convenio[]
+  salas         Sala[]
+  agendamentos  Agendamento[]
+  lancamentos   Lancamento[]
+  comissoes     Comissao[]
+  notasFiscais  NotaFiscal[]
+  integracoes   IntegracaoFiscal[]
+  configNfse    ConfigNfse[]
+  mensagemTemplates MensagemTemplate[]
+  configMensagem ConfigMensagem?
+  mensagensEnviadas MensagemEnviada[]
+  configPagamento ConfigPagamento?
+  cobrancas     Cobranca[]
+  fechamentosCaixa FechamentoCaixa[]
+}
+
+model ConfigNfse {
+  id                  String   @id @default(uuid())
+  clinicaId           String
+  municipio           String?
+  uf                  String?
+  ibge                String? // código IBGE do município
+  inscricaoMunicipal  String?
+  endpointHomologacao String?
+  endpointProducao    String?
+  certPath            String? // caminho do certificado .pfx
+  certPassword        String?
+  ambiente            String   @default("homologacao") // "homologacao" | "producao"
+  padrao              String   @default("abrasf") // "abrasf" (municipal) | "nacional" (LC 214/2025)
+  ativa               Boolean  @default(false)
+  criadoEm            DateTime @default(now())
+  atualizadoEm        DateTime @updatedAt
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+
+  @@unique([clinicaId])
+}
+
+model IntegracaoFiscal {
+  id          String   @id @default(uuid())
+  clinicaId   String
+  provedor    String   // "tiny" | "bling"
+  chave       String?  // token / api key
+  ativa       Boolean  @default(true)
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+
+  @@unique([clinicaId, provedor])
+}
+
+enum StatusNotaFiscal {
+  rascunho
+  loteEnviado
+  autorizada
+  rejeitada
+  cancelada
+}
+
+enum TipoNotaFiscal {
+  nfs_e
+  nf_e
+}
+
+model NotaFiscal {
+  id              String            @id @default(uuid())
+  clinicaId       String
+  numero          Int
+  serie           String            @default("1")
+  tipo            TipoNotaFiscal    @default(nfs_e)
+  status          StatusNotaFiscal  @default(rascunho)
+  valor           Decimal
+  descricao       String
+  codigoServico   String?           // código da lista de serviços municipal (ex.: 85.03)
+  aliquota        Decimal           @default(5)
+  deducao         Decimal           @default(0)
+  issRetido       Boolean           @default(false)
+  observacao      String?
+  pacienteId      String
+  lancamentoId    String?
+  agendamentoId   String?
+  provedor        String            @default("proprio")
+  xmlUrl          String?
+  danfeUrl        String?
+  protocolo       String?
+  nfsNumero       String?           // número da NFS-e retornado pelo município
+  externoId       String?           // id da nota no Tiny/Bling
+  mensagemRetorno String?
+  emitidaEm       DateTime          @default(now())
+  autorizadaEm    DateTime?
+  canceladaEm     DateTime?
+  criadoEm        DateTime          @default(now())
+  atualizadoEm    DateTime          @updatedAt
+
+  clinica   Clinica   @relation(fields: [clinicaId], references: [id])
+  paciente  Paciente  @relation(fields: [pacienteId], references: [id])
+  lancamento Lancamento? @relation(fields: [lancamentoId], references: [id])
+
+  @@unique([clinicaId, numero])
+  @@index([clinicaId, status])
+  @@index([pacienteId])
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  clinicaId String
+  nome      String
+  email     String   @unique
+  senhaHash String
+  cargo     Cargo    @default(recepcionista)
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+
+  clinica      Clinica      @relation(fields: [clinicaId], references: [id])
+  profissional Profissional?
+  fechamentosCaixa FechamentoCaixa[]
+}
+
+model Paciente {
+  id                String    @id @default(uuid())
+  clinicaId         String
+  nome              String
+  dataNascimento    DateTime?
+  cpf               String?
+  rg                String?
+  telefone          String?
+  whatsapp          String?
+  email             String?
+  endereco          String?
+  complemento       String?
+  cep               String?
+  contatoEmergencial String?
+  alergias          String?
+  indicacao         String?
+  observacoes       String?
+  convenioId        String?
+  status            String    @default("ativo")
+  criadoEm          DateTime  @default(now())
+  atualizadoEm      DateTime  @updatedAt
+
+  clinica    Clinica      @relation(fields: [clinicaId], references: [id])
+  convenio   Convenio?    @relation(fields: [convenioId], references: [id])
+  prontuarios Prontuario[]
+  agendamentos Agendamento[]
+  odontograma OdontogramaDente[]
+  evolucoes  Evolucao[]
+  exames     Exame[]
+  receituarios Receituario[]
+  lancamentos Lancamento[]
+  notasFiscais NotaFiscal[]
+  termos TermoConsentimento[]
+  mensagensEnviadas MensagemEnviada[]
+}
+
+model Lancamento {
+  id             String          @id @default(uuid())
+  clinicaId      String
+  tipo           TipoLancamento  @default(receita)
+  descricao      String
+  valor          Decimal
+  formaPagamento FormaPagamento?
+  status         StatusLancamento @default(pendente)
+  pacienteId     String?
+  profissionalId String?
+  procedimentoId String?
+  desconto       Decimal         @default(0) // desconto concedido (R$)
+  quantidadeParcelas Int         @default(1) // 1 = à vista
+  numeroParcela  Int             @default(1) // parcela atual (1..quantidadeParcelas)
+  grupoParcelas  String?         // id do grupo para agrupar parcelas do mesmo lançamento
+  dataVencimento DateTime?
+  dataPagamento  DateTime?
+  observacoes    String?
+  criadoEm       DateTime        @default(now())
+
+  clinica       Clinica       @relation(fields: [clinicaId], references: [id])
+  paciente      Paciente?     @relation(fields: [pacienteId], references: [id])
+  profissional  Profissional? @relation(fields: [profissionalId], references: [id])
+  procedimento  Procedimento? @relation(fields: [procedimentoId], references: [id])
+  comissoes     Comissao[]
+  notasFiscais  NotaFiscal[]
+  cobrancas Cobranca[]
+
+  @@index([clinicaId, status])
+  @@index([clinicaId, dataVencimento])
+  @@index([pacienteId])
+}
+
+enum TipoLancamento {
+  receita
+  despesa
+}
+
+enum FormaPagamento {
+  dinheiro
+  pix
+  cartao_credito
+  cartao_debito
+  convenio
+  transferencia
+}
+
+enum StatusLancamento {
+  pendente
+  pago
+  cancelado
+}
+
+model Comissao {
+  id             String   @id @default(uuid())
+  clinicaId      String
+  lancamentoId   String
+  profissionalId String
+  percentual     Decimal
+  valor          Decimal
+  paga           Boolean  @default(false)
+  pagaEm         DateTime?
+  criadoEm       DateTime @default(now())
+
+  clinica      Clinica      @relation(fields: [clinicaId], references: [id])
+  lancamento   Lancamento   @relation(fields: [lancamentoId], references: [id], onDelete: Cascade)
+  profissional Profissional @relation(fields: [profissionalId], references: [id])
+
+  @@unique([lancamentoId, profissionalId])
+}
+
+model Profissional {
+  id                 String    @id @default(uuid())
+  clinicaId          String
+  usuarioId          String    @unique
+  nome               String
+  cro                String
+  especialidade      String?
+  horarioAtendimento String?
+  comissao           Decimal   @default(0)
+  criadoEm           DateTime  @default(now())
+  atualizadoEm       DateTime  @updatedAt
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  agendamentos Agendamento[]
+  evolucoes Evolucao[]
+  receituarios Receituario[]
+  lancamentos Lancamento[]
+  comissoes Comissao[]
+  termos TermoConsentimento[]
+}
+
+model Procedimento {
+  id             String   @id @default(uuid())
+  clinicaId      String
+  nome           String
+  codigoTuss     String?
+  valorParticular Decimal  @default(0)
+  duracaoMedia   Int      @default(30)
+  ativo          Boolean  @default(true)
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  clinica  Clinica   @relation(fields: [clinicaId], references: [id])
+  convenios ConvenioProcedimento[]
+  agendamentos Agendamento[]
+  lancamentos Lancamento[]
+}
+
+model Convenio {
+  id        String   @id @default(uuid())
+  clinicaId String
+  nome      String
+  registro  String?
+  telefone  String?
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+
+  clinica     Clinica                @relation(fields: [clinicaId], references: [id])
+  procedimentos ConvenioProcedimento[]
+  pacientes   Paciente[]
+}
+
+model ConvenioProcedimento {
+  id            String @id @default(uuid())
+  convenioId    String
+  procedimentoId String
+  valor         Decimal @default(0)
+
+  convenio     Convenio     @relation(fields: [convenioId], references: [id], onDelete: Cascade)
+  procedimento Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Cascade)
+
+  @@unique([convenioId, procedimentoId])
+}
+
+model Prontuario {
+  id         String   @id @default(uuid())
+  pacienteId String
+  clinicaId  String
+  titulo     String
+  conteudo   String
+  tipo       String   @default("evolucao")
+  criadoEm   DateTime @default(now())
+
+  paciente Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+}
+
+enum CondicaoDente {
+  saudavel
+  carie
+  restauracao
+  extraido
+  canal
+  coroa
+  implante
+  ausente
+}
+
+model OdontogramaDente {
+  id         String         @id @default(uuid())
+  clinicaId  String
+  pacienteId String
+  numero     Int
+  condicao   CondicaoDente  @default(saudavel)
+  observacao String?
+  criadoEm   DateTime       @default(now())
+  atualizadoEm DateTime     @updatedAt
+
+  paciente Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+
+  @@unique([pacienteId, numero])
+}
+
+model Evolucao {
+  id             String   @id @default(uuid())
+  clinicaId      String
+  pacienteId     String
+  profissionalId String
+  descricao      String
+  conduta        String?
+  criadoEm       DateTime @default(now())
+
+  paciente     Paciente     @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  profissional Profissional @relation(fields: [profissionalId], references: [id])
+}
+
+model Exame {
+  id          String   @id @default(uuid())
+  clinicaId   String
+  pacienteId  String
+  tipo        String   @default("imagem")
+  descricao   String?
+  arquivoUrl  String?
+  arquivoNome String?
+  criadoEm    DateTime @default(now())
+
+  paciente Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+}
+
+model Receituario {
+  id             String   @id @default(uuid())
+  clinicaId      String
+  pacienteId     String
+  profissionalId String
+  medicamentos   String
+  instrucoes     String?
+  assinatura     String?
+  criadoEm       DateTime @default(now())
+
+  paciente     Paciente     @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  profissional Profissional @relation(fields: [profissionalId], references: [id])
+}
+
+enum StatusAgendamento {
+  agendado
+  confirmado
+  atendido
+  faltou
+  cancelado
+  bloqueado
+}
+
+model Sala {
+  id        String   @id @default(uuid())
+  clinicaId String
+  nome      String
+  ativa     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+
+  clinica     Clinica      @relation(fields: [clinicaId], references: [id])
+  agendamentos Agendamento[]
+}
+
+model Agendamento {
+  id                String            @id @default(uuid())
+  clinicaId         String
+  pacienteId        String?
+  profissionalId    String
+  salaId            String?
+  procedimentoId    String?
+  dataHora          DateTime
+  duracaoMin        Int               @default(30)
+  status            StatusAgendamento @default(agendado)
+  observacoes       String?
+  ehRetorno         Boolean           @default(false)
+  confirmacaoEnviada Boolean          @default(false)
+  lembreteEnviado    Boolean          @default(false)
+  agendamentoOrigemId String?
+  criadoEm          DateTime          @default(now())
+  atualizadoEm      DateTime          @updatedAt
+
+  clinica      Clinica       @relation(fields: [clinicaId], references: [id])
+  paciente     Paciente?     @relation(fields: [pacienteId], references: [id])
+  profissional Profissional  @relation(fields: [profissionalId], references: [id])
+  sala         Sala?         @relation(fields: [salaId], references: [id])
+  procedimento Procedimento? @relation(fields: [procedimentoId], references: [id])
+  origem       Agendamento?  @relation("RetornoOrigem", fields: [agendamentoOrigemId], references: [id])
+  retornos     Agendamento[] @relation("RetornoOrigem")
+  mensagensEnviadas MensagemEnviada[]
+
+  @@index([clinicaId, dataHora])
+  @@index([pacienteId])
+}
+
+model ConfigMensagem {
+  id            String  @id @default(uuid())
+  clinicaId     String  @unique
+  antecedenciaMin Int   @default(1440)
+  ativoLembrete Boolean  @default(true)
+  ativoRetorno  Boolean  @default(true)
+  ativoAniversario Boolean @default(true)
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+
+  @@index([clinicaId])
+}
+
+model MensagemEnviada {
+  id            String   @id @default(uuid())
+  clinicaId     String
+  pacienteId    String?
+  agendamentoId String?
+  tipo          String   // "confirmacao" | "lembrete" | "retorno" | "aniversario"
+  contato       String
+  texto         String
+  enviado       Boolean
+  metodo        String   // "whatsapp" | "sms" | "simulado"
+  detalhe       String?
+  criadoEm      DateTime @default(now())
+
+  clinica     Clinica      @relation(fields: [clinicaId], references: [id])
+  paciente    Paciente?    @relation(fields: [pacienteId], references: [id])
+  agendamento Agendamento? @relation(fields: [agendamentoId], references: [id])
+
+  @@index([clinicaId, tipo, criadoEm])
+  @@index([pacienteId, tipo])
+}
+
+model MensagemTemplate {
+  id        String   @id @default(uuid())
+  clinicaId String
+  tipo      String   // "confirmacao" | "lembrete" | "retorno" | "aniversario"
+  nome      String
+  texto     String // com placeholders: {{paciente}}, {{data}}, {{hora}}, {{profissional}}, {{procedimento}}, {{clinica}}
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+
+  @@unique([clinicaId, tipo])
+}
+
+model TermoConsentimento {
+  id             String   @id @default(uuid())
+  clinicaId      String
+  pacienteId     String
+  profissionalId String?
+  titulo         String
+  conteudo       String
+  assinado       Boolean  @default(false)
+  dataAssinatura DateTime?
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  paciente     Paciente     @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  profissional Profissional? @relation(fields: [profissionalId], references: [id])
+}
+
+model ConfigPagamento {
+  id           String   @id @default(uuid())
+  clinicaId    String   @unique
+  provider     String   @default("efi") // "efi"
+  ambiente     String   @default("sandbox") // "sandbox" | "producao"
+  clientId     String?
+  clientSecret String?
+  pixChave     String? // chave Pix (utilizada no QR do modo simulação)
+  webhookSecret String? // HMAC enviado como query param (skip-mTLS da Efí)
+  webhookIp     String? // IP permitido para o webhook (padrão Efí: 34.193.116.226)
+  ativa        Boolean  @default(false)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id])
+}
+
+model Cobranca {
+  id             String   @id @default(uuid())
+  clinicaId      String
+  lancamentoId   String
+  gateway        String   @default("efi")
+  forma          String // "pix" | "boleto" | "cartao"
+  valor          Decimal
+  status         String   @default("pendente") // "pendente" | "paga" | "cancelada" | "expirada"
+  gatewayId      String? // id da cobrança no gateway (txid / charge id)
+  pixCopiaECola  String?
+  pixQrCodeUrl   String?
+  boletoLinha    String?
+  boletoUrl      String?
+  cartaoLink     String?
+  cartaoParcelas    Int?
+  cartaoUltimosDigitos String?
+  dataVencimento DateTime?
+  dataPagamento  DateTime?
+  erro           String?
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  clinica   Clinica   @relation(fields: [clinicaId], references: [id])
+  lancamento Lancamento @relation(fields: [lancamentoId], references: [id], onDelete: Cascade)
+
+  @@index([clinicaId, status])
+  @@index([lancamentoId])
+}
+
+model FechamentoCaixa {
+  id            String   @id @default(uuid())
+  clinicaId     String
+  data          DateTime // data do dia (início do dia, fuso local)
+  situacao      String   @default("aberto") // "aberto" | "fechado"
+  dinheiroInicial Decimal @default(0)
+  totalReceitas Decimal  @default(0)
+  totalDespesas Decimal  @default(0)
+  totalGeral    Decimal  @default(0) // dinheiroInicial + receitas - despesas
+  valorInformado Decimal? // valor contado em caixa no fechamento
+  divergencia   Decimal?  // valorInformado - totalGeral
+  observacoes   String?
+  usuarioId     String? // usuário que abriu/fechou
+  abertoEm      DateTime?
+  fechadoEm     DateTime?
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+
+  clinica     Clinica   @relation(fields: [clinicaId], references: [id])
+  responsavel Usuario?  @relation(fields: [usuarioId], references: [id])
+
+  @@unique([clinicaId, data])
+  @@index([clinicaId])
+}
