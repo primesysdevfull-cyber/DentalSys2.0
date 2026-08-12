@@ -157,7 +157,7 @@ export default function NotasFiscais() {
     <div>
       <div className="cabecalho-pagina">
         <h2>Notas Fiscais</h2>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="toolbar">
           <button className="btn btn-secondary" onClick={() => setMostrarIntegracoes((v) => !v)}>
             Integrações
           </button>
@@ -169,25 +169,25 @@ export default function NotasFiscais() {
         </div>
       </div>
 
-      {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erro}</p>}
+      {erro && <p className="text-danger mb-1">{erro}</p>}
 
       {mostrarIntegracoes && (
-        <div className="card" style={{ marginBottom: "1.25rem" }}>
-          <h3 style={{ marginBottom: 12 }}>Integrações fiscais</h3>
-          <p style={{ fontSize: 13, color: "#475569", marginBottom: 12 }}>
+        <div className="card section-card">
+          <h3 className="mb-1">Integrações fiscais</h3>
+          <p className="text-muted mb-1">
             Conecte sua conta no <b>Tiny</b> (token da API) ou <b>Bling</b> (access token v3) para emitir as notas
             diretamente pelo sistema. Sem integração, a emissão usa o emissor próprio.
           </p>
           <IntegracoesForm onSalvo={() => carregar()} />
-          <div style={{ borderTop: "1px solid #e2e8f0", margin: "1rem 0", paddingTop: "1rem" }}>
+          <div className="divider">
             <ConfigNfseForm />
           </div>
         </div>
       )}
 
       {mostrarForm && (
-        <form className="card" onSubmit={cadastrar} style={{ marginBottom: "1.25rem" }}>
-          <h3 style={{ marginBottom: 16 }}>Nova nota fiscal</h3>
+        <form className="card" onSubmit={cadastrar}>
+          <h3 className="mb-2">Nova nota fiscal</h3>
           <div className="grid-2">
             <div className="field">
               <label>Paciente *</label>
@@ -253,8 +253,8 @@ export default function NotasFiscais() {
                 <option value="bling">Bling</option>
               </select>
             </div>
-            <div className="field" style={{ gridColumn: "1 / -1" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <div className="field full-width">
+              <label className="label-inline">
                 <input
                   type="checkbox"
                   checked={form.issRetido}
@@ -263,7 +263,7 @@ export default function NotasFiscais() {
                 ISS retido
               </label>
             </div>
-            <div className="field" style={{ gridColumn: "1 / -1" }}>
+            <div className="field full-width">
               <label>Observações</label>
               <textarea rows={2} value={form.observacao} onChange={(e) => atualizar("observacao", e.target.value)} />
             </div>
@@ -272,8 +272,8 @@ export default function NotasFiscais() {
         </form>
       )}
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-        <label style={{ fontSize: 13, fontWeight: 600 }}>Status:</label>
+      <div className="toolbar" style={{ marginBottom: 12 }}>
+        <label className="font-strong">Status:</label>
         <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
           <option value="">Todos</option>
           {Object.entries(STATUS_LABEL).map(([k, v]) => (
@@ -303,19 +303,17 @@ export default function NotasFiscais() {
           <tbody>
             {notas.map((n) => (
               <tr key={n.id}>
-                <td style={{ fontWeight: 600 }}>{n.numero}</td>
+                <td className="font-strong">{n.numero}</td>
                 <td>{n.paciente?.nome || "—"}</td>
                 <td>{n.tipo === "nfs_e" ? "NFS-e" : "NF-e"}</td>
-                <td style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {n.descricao}
-                </td>
+                <td className="ellipsis">{n.descricao}</td>
                 <td>{formatarMoeda(n.valor)}</td>
                 <td>{PROVIDER_LABEL[n.provedor] || n.provedor}</td>
                 <td>
                   <span className={n.status === "autorizada" ? "status-ativo" : "status-inativo"}>
                     {STATUS_LABEL[n.status] || n.status}
                   </span>
-                  {n.protocolo && <div style={{ fontSize: 11, color: "#64748b" }}>Prot.: {n.protocolo}</div>}
+                  {n.protocolo && <div className="text-muted small">Prot.: {n.protocolo}</div>}
                 </td>
                 <td>
                   {n.status === "rascunho" && (
@@ -324,14 +322,13 @@ export default function NotasFiscais() {
                     </button>
                   )}
                   {n.status !== "cancelada" && podeExcluir && n.status !== "autorizada" && (
-                    <button className="btn-excluir" style={{ marginLeft: 4 }} onClick={() => cancelar(n)}>
+                    <button className="btn-excluir" onClick={() => cancelar(n)}>
                       Cancelar
                     </button>
                   )}
                   {n.mensagemRetorno && (
                     <button
                       className="btn btn-secondary btn-sm"
-                      style={{ marginLeft: 4 }}
                       onClick={() => alert(n.mensagemRetorno)}
                     >
                       Detalhes
@@ -375,15 +372,15 @@ function IntegracoesForm({ onSalvo }: { onSalvo: () => void }) {
 
   return (
     <div>
-      <form onSubmit={salvar} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-        <div className="field" style={{ margin: 0 }}>
+      <form onSubmit={salvar} className="form-inline">
+        <div className="field">
           <label>ERP</label>
           <select value={form.provedor} onChange={(e) => setForm({ ...form, provedor: e.target.value as "tiny" | "bling" })}>
             <option value="tiny">Tiny</option>
             <option value="bling">Bling</option>
           </select>
         </div>
-        <div className="field" style={{ margin: 0, flex: 1, minWidth: 260 }}>
+        <div className="field" style={{ flex: 1, minWidth: 260 }}>
           <label>{form.provedor === "tiny" ? "Token da API Tiny" : "Access token Bling v3"}</label>
           <input
             value={form.chave}
@@ -394,14 +391,14 @@ function IntegracoesForm({ onSalvo }: { onSalvo: () => void }) {
         </div>
         <button className="btn btn-primary btn-sm" disabled={salvando}>{salvando ? "Salvando..." : "Salvar"}</button>
       </form>
-      {erro && <p style={{ color: "var(--cor-perigo)", fontSize: 13, marginTop: 8 }}>{erro}</p>}
+      {erro && <p className="text-danger small mt-1">{erro}</p>}
 
       {integracoes.length > 0 && (
         <div style={{ marginTop: 12 }}>
           {integracoes.map((i) => (
-            <div key={i.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
-              <span className="status-cargo" style={{ textTransform: "uppercase" }}>{i.provedor}</span>
-              <span style={{ fontSize: 13, color: "#475569", fontFamily: "monospace" }}>{i.chave}</span>
+            <div key={i.id} className="integracao-row">
+              <span className="status-cargo">{i.provedor}</span>
+              <span className="code-inline">{i.chave}</span>
               <span className={i.ativa ? "status-ativo" : "status-inativo"}>{i.ativa ? "Ativa" : "Inativa"}</span>
             </div>
           ))}

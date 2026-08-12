@@ -87,11 +87,11 @@ export default function Usuarios() {
         </button>
       </div>
 
-      {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erro}</p>}
+      {erro && <p className="text-danger mb-1">{erro}</p>}
 
-      <div className="card" style={{ background: "#eff6ff" }}>
-        <strong style={{ fontSize: 14 }}>Permissões por cargo</strong>
-        <ul style={{ fontSize: 13, color: "#475569", marginTop: 8, paddingLeft: 20 }}>
+      <div className="card card-info">
+        <strong className="font-strong">Permissões por cargo</strong>
+        <ul className="text-muted mt-1 pl-5">
           <li><b>Administrador:</b> acesso total ao sistema.</li>
           <li><b>Dentista:</b> vê e edita pacientes e prontuário clínico; não exclui nem gerencia financeiro/usuários.</li>
           <li><b>Recepcionista:</b> cadastra e edita pacientes, mas <b>não vê prontuário clínico</b>.</li>
@@ -100,7 +100,7 @@ export default function Usuarios() {
 
       {mostrarForm && (
         <form className="card" onSubmit={salvar}>
-          <h3 style={{ marginBottom: 16 }}>{editando ? `Editar: ${editando.nome}` : "Novo usuário"}</h3>
+          <h3 className="mb-2">{editando ? `Editar: ${editando.nome}` : "Novo usuário"}</h3>
           <div className="grid-2">
             <div className="field">
               <label>Nome *</label>
@@ -153,7 +153,7 @@ export default function Usuarios() {
                     {u.ativo ? "ativo" : "inativo"}
                   </span>
                 </td>
-                <td style={{ whiteSpace: "nowrap" }}>
+                <td className="nowrap">
                   <button className="btn-editar" onClick={() => editar(u)}>
                     Editar
                   </button>

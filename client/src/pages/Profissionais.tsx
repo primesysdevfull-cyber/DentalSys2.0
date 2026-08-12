@@ -111,11 +111,11 @@ export default function Profissionais() {
         )}
       </div>
 
-      {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erro}</p>}
+      {erro && <p className="text-danger mb-1">{erro}</p>}
 
       {mostrarForm && (
         <form className="card" onSubmit={salvar}>
-          <h3 style={{ marginBottom: 16 }}>{editando ? `Editar: ${editando.nome}` : "Novo profissional"}</h3>
+          <h3 className="mb-2">{editando ? `Editar: ${editando.nome}` : "Novo profissional"}</h3>
           <div className="grid-2">
             <div className="field">
               <label>Nome completo *</label>
@@ -185,7 +185,7 @@ export default function Profissionais() {
                 <td>
                   <span className="status-cargo">{p.usuario.cargo}</span>
                 </td>
-                <td style={{ whiteSpace: "nowrap" }}>
+                <td className="nowrap">
                   {podeEditar && (
                     <button className="btn-editar" onClick={() => editar(p)}>
                       Editar

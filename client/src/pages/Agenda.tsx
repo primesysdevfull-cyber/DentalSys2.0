@@ -424,7 +424,7 @@ export default function Agenda() {
           </div>
         </div>
 
-        {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erro}</p>}
+        {erro && <p className="text-danger mb-1">{erro}</p>}
 
         <input
           className="busca"
@@ -441,13 +441,13 @@ export default function Agenda() {
           <div className="historico-cards">
             {pacientesFiltrados.map((a) => (
               <div className="card" key={a.id}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <b>{a.paciente?.nome || "—"}</b>
-                  <span className={a.status === "atendido" ? "status-ativo" : "agenda-status-faltou"}>
-                    {a.status === "atendido" ? "Atendido" : "Faltou"}
-                  </span>
-                </div>
-                <div style={{ fontSize: 13, color: "#475569", display: "grid", gap: 3 }}>
+                        <div className="card-header">
+                          <b>{a.paciente?.nome || "—"}</b>
+                          <span className={a.status === "atendido" ? "status-ativo" : "agenda-status-faltou"}>
+                            {a.status === "atendido" ? "Atendido" : "Faltou"}
+                          </span>
+                        </div>
+                        <div className="info-grid text-muted">
                   <span>📅 {formatarDataHora(a.dataHora)}</span>
                   <span>👨‍⚕️ {a.profissional?.nome}</span>
                   {a.procedimento && <span>🦷 {a.procedimento.nome}</span>}
@@ -491,32 +491,25 @@ export default function Agenda() {
           <span className="agenda-data-titulo">{tituloPeriodo}</span>
         </div>
 
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <select
-            style={{ padding: "0.5rem", borderRadius: 8, border: "2px solid #e2e8f0", background: "white" }}
-            value={filtroSala}
-            onChange={(e) => setFiltroSala(e.target.value)}
-          >
+        <div className="toolbar" style={{ marginLeft: "auto" }}>
+          <select className="input-compact" value={filtroSala} onChange={(e) => setFiltroSala(e.target.value)}>
             <option value="">Todas as salas</option>
             {salas.map((s) => (
               <option key={s.id} value={s.id}>{s.nome}</option>
             ))}
           </select>
-          <select
-            style={{ padding: "0.5rem", borderRadius: 8, border: "2px solid #e2e8f0", background: "white" }}
-            value={filtroProfissional}
-            onChange={(e) => setFiltroProfissional(e.target.value)}
-          >
+          <select className="input-compact" value={filtroProfissional} onChange={(e) => setFiltroProfissional(e.target.value)}>
             <option value="">Todos os profissionais</option>
             {profissionais.map((p) => (
               <option key={p.id} value={p.id}>{p.nome}</option>
             ))}
           </select>
         </div>
+        
       </div>
 
       {podeEditar && (
-        <div className="card" style={{ display: "flex", gap: "1rem", alignItems: "flex-end", padding: "0.8rem 1rem" }}>
+        <div className="card toolbar">
           <button className="btn btn-secondary btn-sm" onClick={() => {
             setFormBloqueio({ profissionalId: filtroProfissional, salaId: "", data: dataRef.toISOString().slice(0, 10), hora: "12:00", duracaoMin: "60", observacoes: "" });
             setModalBloqueio(true);
@@ -524,17 +517,15 @@ export default function Agenda() {
             🔒 Bloquear horário
           </button>
           {podeGerenciarSalas && (
-            <form onSubmit={adicionarSala} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input placeholder="Nova sala..." value={novaSala} onChange={(e) => setNovaSala(e.target.value)} style={{ padding: "0.4rem 0.6rem", borderRadius: 6, border: "2px solid #e2e8f0", width: 150 }} />
+            <form onSubmit={adicionarSala} className="form-inline">
+              <input placeholder="Nova sala..." value={novaSala} onChange={(e) => setNovaSala(e.target.value)} className="input-compact" />
               <button className="btn btn-secondary btn-sm">+ Sala</button>
             </form>
           )}
           {podeGerenciarSalas && salas.map((s) => (
-            <span key={s.id} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#f1f5f9", padding: "4px 10px", borderRadius: 999, fontSize: 12 }}>
+            <span key={s.id} className="chip">
               {s.nome}
-              <button type="button" onClick={() => removerSala(s.id)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "#ef4444" }}>
-                ×
-              </button>
+              <button type="button" onClick={() => removerSala(s.id)} className="chip-remove">×</button>
             </span>
           ))}
         </div>
@@ -544,10 +535,16 @@ export default function Agenda() {
         <p>Carregando...</p>
       ) : visao === "mes" ? (
         <div className="agenda-mes-grade">
-          {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((d) => (
-            <div key={d} style={{ background: "#f1f5f9", textAlign: "center", padding: "6px", fontWeight: 700, fontSize: 12, color: "#475569" }}>
-              {d}
-            </div>
+          {[
+            "Seg",
+            "Ter",
+            "Qua",
+            "Qui",
+            "Sex",
+            "Sáb",
+            "Dom",
+          ].map((d) => (
+            <div key={d} className="mes-header-cell">{d}</div>
           ))}
           {diasDoMes.map((dia, i) => {
             const foraDoMes = dia.getMonth() !== dataRef.getMonth();
@@ -565,7 +562,7 @@ export default function Agenda() {
                     {new Date(a.dataHora).toTimeString().slice(0, 5)} {a.paciente?.nome || "Bloqueio"}
                   </span>
                 ))}
-                {eventos.length > 4 && <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>+{eventos.length - 4} mais</div>}
+                {eventos.length > 4 && <div className="text-muted small mt-1">+{eventos.length - 4} mais</div>}
               </div>
             );
           })}

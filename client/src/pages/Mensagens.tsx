@@ -29,7 +29,7 @@ export default function Mensagens() {
         <h2>Mensagens</h2>
       </div>
 
-      <div className="agenda-tabs" style={{ marginBottom: "1.25rem" }}>
+      <div className="agenda-tabs">
         <button className={`agenda-tab ${aba === "confirmacoes" ? "ativo" : ""}`} onClick={() => setAba("confirmacoes")}>
           Confirmações pendentes
         </button>
@@ -115,15 +115,15 @@ function Automatico({ podeConfigurar }: { podeConfigurar: boolean }) {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid var(--cor-primaria)" }}>
-        <h3 style={{ marginBottom: 8 }}>Envio automático de mensagens</h3>
-        <p style={{ fontSize: 14, color: "#475569", marginBottom: "1rem" }}>
+      <div className="card section-card">
+        <h3 className="mb-1">Envio automático de mensagens</h3>
+        <p className="text-muted mb-1">
           O servidor verifica periodicamente e envia: <b>lembrete</b> (antes do atendimento), <b>retorno</b>
           (atrasados) e <b>aniversário</b> (pacientes aniversariantes), usando os modelos ativos da aba anterior.
           Cada envio é registrado no histórico abaixo.
         </p>
 
-        <form onSubmit={salvar} style={{ display: "grid", gap: 12, maxWidth: 520 }}>
+        <form onSubmit={salvar} className="form-grid">
           <div className="field">
             <label>Antecedência do lembrete</label>
             <select
@@ -139,22 +139,22 @@ function Automatico({ podeConfigurar }: { podeConfigurar: boolean }) {
             </select>
           </div>
 
-          <div style={{ display: "grid", gap: 8 }}>
+          <div className="form-grid">
             {[
               { campo: "ativoLembrete" as const, label: "Enviar lembretes de atendimento" },
               { campo: "ativoRetorno" as const, label: "Enviar aviso de retorno atrasado" },
               { campo: "ativoAniversario" as const, label: "Enviar mensagem de aniversário" },
             ].map((t) => (
-              <label key={t.campo} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
+              <label key={t.campo} className="label-inline text-small">
                 <input type="checkbox" checked={config[t.campo]} onChange={() => toggle(t.campo)} />
                 {t.label}
               </label>
             ))}
           </div>
 
-          {erro && <p style={{ color: "var(--cor-perigo)" }}>{erro}</p>}
+          {erro && <p className="text-danger">{erro}</p>}
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="flex-wrap">
             {podeConfigurar ? (
               <button className="btn btn-primary btn-sm" disabled={salvando}>
                 {salvando ? "Salvando..." : "Salvar configuração"}
@@ -169,24 +169,22 @@ function Automatico({ podeConfigurar }: { podeConfigurar: boolean }) {
         </form>
 
         {resultado && (
-          <div className="card" style={{ marginTop: "1rem", borderLeft: "4px solid var(--cor-sucesso)", background: "#f0fdf4" }}>
-            <p style={{ fontSize: 14, marginBottom: 4 }}>
+          <div className="card card-success">
+            <p className="text-small" style={{ marginBottom: 4 }}>
               <b>Disparo concluído:</b> {resultado.lembretes} lembretes, {resultado.retornos} retornos,{" "}
               {resultado.aniversarios} aniversários.
             </p>
             {!resultado.configurado && (
-              <p style={{ fontSize: 13, color: "#d97706" }}>
-                Sem WHATSAPP_API_URL configurado, os envios são registrados como <b>simulados</b>.
-              </p>
+              <p className="text-muted">Sem WHATSAPP_API_URL configurado, os envios são registrados como <b>simulados</b>.</p>
             )}
           </div>
         )}
       </div>
 
       <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: 8 }}>
+        <div className="card-header">
           <h3 style={{ marginBottom: 0 }}>Histórico de envios</h3>
-          <select value={filtro} onChange={(e) => { setFiltro(e.target.value); listarEnvios(e.target.value || undefined).then(setEnvios); }} style={{ padding: 6, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+          <select value={filtro} onChange={(e) => { setFiltro(e.target.value); listarEnvios(e.target.value || undefined).then(setEnvios); }} className="input-compact">
             <option value="">Todos os tipos</option>
             {TIPOS_TEMPLATE.map((t) => (
               <option key={t.tipo} value={t.tipo}>{t.label}</option>
@@ -200,23 +198,21 @@ function Automatico({ podeConfigurar }: { podeConfigurar: boolean }) {
           <div className="historico-cards">
             {envios.map((e) => (
               <div className="card" key={e.id}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                <div className="card-header">
                   <b>{e.paciente?.nome || "Paciente removido"}</b>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>
-                    {TIPOS_TEMPLATE.find((t) => t.tipo === e.tipo)?.label} •{" "}
-                    {new Date(e.criadoEm).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  <span className="text-muted" style={{ fontSize: 12 }}>
+                    {TIPOS_TEMPLATE.find((t) => t.tipo === e.tipo)?.label} • {new Date(e.criadoEm).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                   </span>
                 </div>
-                <p style={{ fontSize: 13, color: "#475569", whiteSpace: "pre-wrap", marginBottom: 4 }}>{e.texto}</p>
+                <p className="message-box">{e.texto}</p>
                 <p style={{ fontSize: 12 }}>
                   {e.enviado ? (
-                    <span style={{ color: "var(--cor-sucesso)", fontWeight: 600 }}>
+                    <span className="text-success" style={{ fontWeight: 600 }}>
                       Enviada via {e.metodo === "whatsapp" ? "WhatsApp" : e.metodo}
                     </span>
                   ) : (
-                    <span style={{ color: "#d97706", fontWeight: 600 }}>{e.detalhe || `Não enviada (${e.metodo})`}</span>
-                  )}{" "}
-                  • 📱 {e.contato}
+                    <span className="badge-aviso" style={{ fontWeight: 600 }}>{e.detalhe || `Não enviada (${e.metodo})`}</span>
+                  )} {" "}• 📱 {e.contato}
                 </p>
               </div>
             ))}
@@ -273,9 +269,9 @@ function Confirmacoes() {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid var(--cor-primaria)" }}>
-        <h3 style={{ marginBottom: 8 }}>Confirmações pendentes</h3>
-        <p style={{ fontSize: 14, color: "#475569", marginBottom: "1rem" }}>
+      <div className="card section-card">
+        <h3 className="mb-1">Confirmações pendentes</h3>
+        <p className="text-muted mb-1">
           Agendamentos futuros ainda sem confirmação enviada ao paciente. As mensagens são enviadas via WhatsApp
           (quando cadastrado) ou SMS, usando o contato registrado.
         </p>
@@ -286,13 +282,13 @@ function Confirmacoes() {
           <div className="historico-cards">
             {pendentes.map((p) => (
               <div className="card" key={p.id}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
+                <div className="card-header">
                   <b>{p.paciente.nome}</b>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                  <span className="text-muted" style={{ fontSize: 12 }}>
                     {new Date(p.dataHora).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                   </span>
                 </div>
-                <div style={{ fontSize: 13, color: "#475569", display: "grid", gap: 3 }}>
+                <div className="info-grid">
                   <span>👨‍⚕️ {p.profissional.nome}{p.procedimento ? ` • ${p.procedimento.nome}` : ""}</span>
                   <span>
                     📱 {p.contato || "sem contato cadastrado"}
@@ -300,7 +296,7 @@ function Confirmacoes() {
                   </span>
                 </div>
                 {podeEnviar && p.contato && (
-                  <div style={{ marginTop: 8 }}>
+                  <div className="mt-1">
                     <button className="btn btn-primary btn-sm" onClick={() => enviarConfirmacao(p.id)} disabled={enviandoId === p.id}>
                       {enviandoId === p.id ? "Enviando..." : "Enviar confirmação"}
                     </button>
@@ -313,19 +309,19 @@ function Confirmacoes() {
       </div>
 
       {ultimaMensagem && (
-        <div className="card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid var(--cor-sucesso)" }}>
-          <h3 style={{ marginBottom: 8 }}>Mensagem para {ultimaMensagem.contato}</h3>
-          <p style={{ fontSize: 14, whiteSpace: "pre-wrap", background: "#f8fafc", padding: 12, borderRadius: 8 }}>
+        <div className="card section-card">
+          <h3 className="mb-1">Mensagem para {ultimaMensagem.contato}</h3>
+          <p className="message-box">
             {ultimaMensagem.texto}
           </p>
           {ultimaMensagem.envio && (
-            <p style={{ fontSize: 13, marginTop: 8 }}>
+            <p className="mt-1">
               {ultimaMensagem.envio.enviado ? (
-                <span style={{ color: "var(--cor-sucesso)", fontWeight: 600 }}>
+                <span className="text-success" style={{ fontWeight: 600 }}>
                   Enviada via {ultimaMensagem.envio.metodo === "whatsapp" ? "WhatsApp" : ultimaMensagem.envio.metodo}
                 </span>
               ) : (
-                <span style={{ color: "#d97706", fontWeight: 600 }}>
+                <span className="badge-aviso" style={{ fontWeight: 600 }}>
                   {ultimaMensagem.envio.atencao || `Não foi possível enviar (${ultimaMensagem.envio.metodo}).`}
                 </span>
               )}
@@ -383,14 +379,14 @@ function Templates({ podeConfigurar }: { podeConfigurar: boolean }) {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid var(--cor-primaria)" }}>
-        <h3 style={{ marginBottom: 8 }}>Modelos de mensagens automáticas</h3>
-        <p style={{ fontSize: 14, color: "#475569", marginBottom: "1rem" }}>
+      <div className="card section-card">
+        <h3 className="mb-1">Modelos de mensagens automáticas</h3>
+        <p className="text-muted mb-1">
           Edite o texto enviado automaticamente por WhatsApp. Use os marcadores abaixo para incluir dados do
           atendimento. A confirmação de agendamento usa o modelo <b>Confirmação</b>.
         </p>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "1rem" }}>
+        <div className="btn-group" style={{ marginBottom: "1rem" }}>
           {TIPOS_TEMPLATE.map((t) => (
             <button
               key={t.tipo}
@@ -427,12 +423,12 @@ function Templates({ podeConfigurar }: { podeConfigurar: boolean }) {
             />
           </div>
           <div className="field">
-            <label style={{ fontSize: 13, color: "#64748b" }}>
-              Marcadores disponíveis: {PLACEHOLDERS.map((p) => <code key={p} style={{ marginRight: 6 }}>{p}</code>)}
+            <label className="text-muted-small">
+              Marcadores disponíveis: {PLACEHOLDERS.map((p) => <code key={p} className="code-inline">{p}</code>)}
             </label>
           </div>
           <div className="field">
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <label className="label-inline">
               <input
                 type="checkbox"
                 checked={atual?.ativo ?? true}
@@ -445,7 +441,7 @@ function Templates({ podeConfigurar }: { podeConfigurar: boolean }) {
               Modelo ativo (usado nos envios automáticos)
             </label>
           </div>
-          {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 8 }}>{erro}</p>}
+          {erro && <p className="text-danger mb-1">{erro}</p>}
           {podeConfigurar ? (
             <button className="btn btn-primary btn-sm" disabled={salvando}>
               {salvando ? "Salvando..." : "Salvar modelo"}

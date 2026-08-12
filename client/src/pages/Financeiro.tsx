@@ -360,7 +360,7 @@ function Lancamentos({
   return (
     <div>
       {resumo && (
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1.25rem" }}>
+        <div className="toolbar">
           <CartaoResumo titulo="Recebido" valor={resumo.totalRecebido} cor="var(--cor-sucesso)" />
           <CartaoResumo titulo="A receber" valor={resumo.aReceber} cor="#d97706" />
           <CartaoResumo titulo="Inadimplência" valor={resumo.inadimplencia} cor="#b91c1c" />
@@ -369,14 +369,14 @@ function Lancamentos({
         </div>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
-        <div style={{ display: "flex", gap: 8 }}>
-          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1" }}>
+      <div className="toolbar justify-between align-center mb-1">
+        <div className="flex-row align-center gap-1">
+          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className="input-compact">
             <option value="">Todos os tipos</option>
             <option value="receita">Receitas</option>
             <option value="despesa">Despesas</option>
           </select>
-          <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1" }}>
+          <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className="input-compact">
             <option value="">Todos os status</option>
             <option value="pendente">Pendentes</option>
             <option value="pago">Pagos</option>
@@ -393,7 +393,7 @@ function Lancamentos({
       {lancamentos.length === 0 ? (
         <div className="aviso-vazio">Nenhum lançamento encontrado.</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div className="table-responsive">
           <table className="tabela-pacientes">
             <thead>
               <tr>
@@ -430,7 +430,7 @@ function Lancamentos({
                       <span className="status-cargo">{l.numeroParcela}/{l.quantidadeParcelas}</span>
                     ) : "—"}
                   </td>
-                  <td style={{ textAlign: "right", fontWeight: 600, color: l.tipo === "receita" ? "var(--cor-sucesso)" : "#b91c1c" }}>
+                  <td className="text-right" style={{ fontWeight: 600, color: l.tipo === "receita" ? "var(--cor-sucesso)" : "#b91c1c" }}>
                     {l.tipo === "receita" ? "+ " : "− "}{formatarMoeda(l.valor)}
                   </td>
                   <td>
@@ -440,7 +440,7 @@ function Lancamentos({
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                    <div className="modal-actions">
                       {podeBaixar && l.status === "pendente" && l.tipo === "receita" && (
                         <button className="btn btn-primary btn-sm" onClick={() => baixar(l.id)}>Receber</button>
                       )}

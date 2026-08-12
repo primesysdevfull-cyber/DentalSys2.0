@@ -163,7 +163,7 @@ export default function Pacientes() {
     <div>
       <div className="cabecalho-pagina">
         <h2>Pacientes</h2>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="toolbar">
           <button className="btn btn-secondary" onClick={baixarCsv}>
             Exportar CSV
           </button>
@@ -176,7 +176,7 @@ export default function Pacientes() {
                 ref={inputArquivo}
                 type="file"
                 accept=".csv,text/csv"
-                style={{ display: "none" }}
+                className="sr-only"
                 onChange={selecionarArquivo}
               />
             </>
@@ -189,14 +189,14 @@ export default function Pacientes() {
         </div>
       </div>
 
-      {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erro}</p>}
+      {erro && <p className="text-danger mb-1">{erro}</p>}
       {msgImportacao && (
-        <p style={{ color: "var(--cor-sucesso, #16a34a)", marginBottom: 12 }}>{msgImportacao}</p>
+        <p className="text-success mb-1">{msgImportacao}</p>
       )}
 
       {mostrarForm && (
         <form className="card" onSubmit={cadastrar}>
-          <h3 style={{ marginBottom: 16 }}>Novo paciente</h3>
+          <h3 className="mb-1">Novo paciente</h3>
           <div className="grid-2">
             <div className="field">
               <label>Nome completo *</label>
@@ -230,7 +230,7 @@ export default function Pacientes() {
             </div>
             <div className="field">
               <label>CEP</label>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className="toolbar">
                 <input
                   inputMode="numeric"
                   maxLength={9}
@@ -247,7 +247,7 @@ export default function Pacientes() {
                   {buscandoCep ? "Buscando..." : "Buscar"}
                 </button>
               </div>
-              {erroCep && <span style={{ color: "var(--cor-perigo)", fontSize: 12 }}>{erroCep}</span>}
+              {erroCep && <span className="text-danger text-small">{erroCep}</span>}
             </div>
             <div className="field">
               <label>Endereço</label>
@@ -265,7 +265,7 @@ export default function Pacientes() {
               <label>Alergias</label>
               <input placeholder="Ex.: penicilina, látex..." value={form.alergias} onChange={(e) => atualizar("alergias", e.target.value)} />
             </div>
-            <div className="field" style={{ gridColumn: "1 / -1" }}>
+            <div className="field full-width">
               <label>Indicação</label>
               <input placeholder="Quem indicou o paciente?" value={form.indicacao} onChange={(e) => atualizar("indicacao", e.target.value)} />
             </div>
@@ -301,8 +301,8 @@ export default function Pacientes() {
             {pacientes.map((p) => {
               const whatsApp = linkWhatsApp(p.whatsapp || p.telefone);
               return (
-                <tr key={p.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/pacientes/${p.id}`)}>
-                  <td style={{ fontWeight: 600, color: "var(--cor-primaria)" }}>{p.nome}</td>
+                <tr key={p.id} className="row-clickable" onClick={() => navigate(`/pacientes/${p.id}`)}>
+                  <td className="link-primary font-strong">{p.nome}</td>
                   <td>{p.cpf || "-"}</td>
                   <td>{p.telefone || "-"}</td>
                   <td>

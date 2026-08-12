@@ -153,8 +153,8 @@ export default function PacienteDetalhe() {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
-        <div style={{ fontSize: 14, color: "#475569" }}>
+      <div className="toolbar mb-2">
+        <div className="text-muted">
           {paciente.cpf && <>CPF: <b>{paciente.cpf}</b> • </>}
           {paciente.convenio?.nome ? <>Convênio: <b>{paciente.convenio.nome}</b></> : "Sem convênio"}
         </div>
@@ -163,15 +163,14 @@ export default function PacienteDetalhe() {
             href={wa}
             target="_blank"
             rel="noreferrer"
-            className="btn btn-secondary btn-sm"
-            style={{ textDecoration: "none", color: "#16a34a" }}
+            className="btn btn-secondary btn-sm link-success"
           >
             💬 WhatsApp
           </a>
         )}
       </div>
 
-      <div className="agenda-tabs" style={{ marginBottom: "1.25rem" }}>
+      <div className="agenda-tabs">
         {abas.map((a) => (
           <button
             key={a.chave}
@@ -183,7 +182,7 @@ export default function PacienteDetalhe() {
         ))}
       </div>
 
-      {erroCep && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erroCep}</p>}
+      {erroCep && <p className="text-danger mb-1">{erroCep}</p>}
 
       {(aba === "dados" || aba === "contato" || aba === "anamnese") && (
         <form className="card" onSubmit={salvarEdicao}>
@@ -304,7 +303,7 @@ export default function PacienteDetalhe() {
               <button className="btn btn-primary">Salvar alterações</button>
             </>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <div className="grid-3">
               {aba === "dados" && (
                 <>
                   <Info label="CPF" valor={paciente.cpf} />
@@ -360,11 +359,11 @@ export default function PacienteDetalhe() {
             <div className="historico-cards">
               {retornos.map((a) => (
                 <div className="card" key={a.id}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div className="toolbar mb-1">
                     <b>{a.procedimento?.nome || "Atendimento"}</b>
                     <span className="status-ativo">Atendido</span>
                   </div>
-                  <div style={{ fontSize: 13, color: "#475569", display: "grid", gap: 3 }}>
+                  <div className="text-muted">
                     <span>📅 {new Date(a.dataHora).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
                     <span>👨‍⚕️ {a.profissional?.nome}</span>
                     {a.sala && <span>🚪 {a.sala.nome}</span>}
@@ -383,8 +382,8 @@ export default function PacienteDetalhe() {
 function Info({ label, valor }: { label: string; valor?: string | null }) {
   return (
     <div>
-      <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 14, marginTop: 2 }}>{valor || "-"}</div>
+      <div className="text-muted-strong">{label}</div>
+      <div className="font-strong mt-1">{valor || "-"}</div>
     </div>
   );
 }

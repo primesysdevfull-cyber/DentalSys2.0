@@ -112,11 +112,11 @@ export default function Procedimentos() {
         )}
       </div>
 
-      {erro && <p style={{ color: "var(--cor-perigo)", marginBottom: 12 }}>{erro}</p>}
+      {erro && <p className="text-danger mb-1">{erro}</p>}
 
       {mostrarForm && (
         <form className="card" onSubmit={salvar}>
-          <h3 style={{ marginBottom: 16 }}>{editando ? `Editar: ${editando.nome}` : "Novo procedimento"}</h3>
+          <h3 className="mb-2">{editando ? `Editar: ${editando.nome}` : "Novo procedimento"}</h3>
           <div className="grid-2">
             <div className="field">
               <label>Nome *</label>
@@ -174,7 +174,7 @@ export default function Procedimentos() {
                     {podeEditar ? (
                       <input
                         inputMode="decimal"
-                        style={{ width: 100, padding: "4px 6px", border: "2px solid #e2e8f0", borderRadius: 6 }}
+                        className="input-compact"
                         placeholder="R$ 0,00"
                         value={valorPara(p, c.id)}
                         onChange={(e) => setValores((v) => ({ ...v, [`${p.id}:${c.id}`]: mascaraMoeda(e.target.value) }))}
@@ -188,7 +188,7 @@ export default function Procedimentos() {
                     )}
                   </td>
                 ))}
-                <td style={{ whiteSpace: "nowrap" }}>
+                <td className="nowrap">
                   {podeEditar && (
                     <button className="btn-editar" onClick={() => editar(p)}>
                       Editar

@@ -39,11 +39,11 @@ export default function Dashboard() {
         <p style={{ color: "var(--cor-perigo)" }}>{erro}</p>
       ) : resumo ? (
         <>
-<div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "1.25rem" }}>
-            <Link to="/agenda?novo=1" className="btn btn-accent btn-sm">+ Novo agendamento</Link>
-            <Link to="/pacientes?novo=1" className="btn btn-accent btn-sm">+ Novo paciente</Link>
+          <div className="page-actions">
+            <Link to="/agenda?novo=1" className="btn btn-accent">+ Novo agendamento</Link>
+            <Link to="/pacientes?novo=1" className="btn btn-accent">+ Novo paciente</Link>
             {resumo.podeVerFinanceiro && (
-              <Link to="/financeiro?novo=1" className="btn btn-accent btn-sm">+ Novo lançamento</Link>
+              <Link to="/financeiro?novo=1" className="btn btn-accent">+ Novo lançamento</Link>
             )}
           </div>
 
@@ -54,7 +54,7 @@ export default function Dashboard() {
             {new Date(resumo.periodo.fim).toLocaleDateString("pt-BR")}
           </div>
 
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1.25rem" }}>
+          <div className="widget-grid">
             <CardPainel titulo="Pacientes ativos" valor={String(resumo.totalPacientes)} link="/pacientes" />
             <CardPainel titulo="Pacientes novos no período" valor={String(resumo.pacientesNovos)} link="/pacientes" />
             <CardPainel
@@ -74,7 +74,7 @@ export default function Dashboard() {
           </div>
 
           {resumo.podeVerFinanceiro && (
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1.25rem" }}>
+            <div className="widget-grid">
               <CardPainel titulo="Recebido (período)" valor={formatarMoeda(resumo.financeiro.receitas)} link="/financeiro" verde />
               <CardPainel titulo="A receber" valor={formatarMoeda(resumo.financeiro.aReceber)} link="/financeiro" amarelo />
               <CardPainel titulo="Despesas" valor={formatarMoeda(resumo.financeiro.despesas)} link="/financeiro" vermelho />
@@ -83,7 +83,7 @@ export default function Dashboard() {
 
           {avisos && <AvisosPainel avisos={avisos} />}
 
-          <div className="card" style={{ marginBottom: "1.25rem" }}>
+          <div className="card section-card" style={{ marginBottom: "1.25rem" }}>
             <h3 style={{ marginBottom: 12 }}>Profissionais mais ativos no período</h3>
             {resumo.rankingProfissionais.length === 0 ? (
               <p style={{ fontSize: 14, color: "#64748b" }}>Nenhum atendimento no período.</p>
@@ -124,7 +124,7 @@ export default function Dashboard() {
           </div>
 
           {resumo.atendimentos.semConfirmacao > 0 && (
-            <div className="card" style={{ borderLeft: "4px solid #d97706" }}>
+            <div className="card section-card" style={{ borderLeft: "4px solid #d97706" }}>
               <h3 style={{ marginBottom: 8 }}>Confirmações pendentes</h3>
               <p style={{ fontSize: 14, color: "#475569" }}>
                 {resumo.atendimentos.semConfirmacao} agendamentos futuros ainda não tiveram a confirmação enviada ao
@@ -154,13 +154,13 @@ function ResumoDoDia({ dia }: { dia: ResumoDia }) {
   const proximos = agendamentosOrdenados.filter((a) => new Date(a.dataHora) >= agora && (a.status === "agendado" || a.status === "confirmado"));
 
   return (
-    <div className="card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid #1d4ed8" }}>
+    <div className="card section-card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid #1d4ed8" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
         <h3 style={{ marginBottom: 0, textTransform: "capitalize" }}>📅 Hoje — {hojeLabel}</h3>
         <Link to="/agenda" className="btn btn-secondary btn-sm">Abrir agenda</Link>
       </div>
 
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1rem" }}>
+      <div className="widget-grid" style={{ marginBottom: "1rem" }}>
         <MiniCard titulo="Atendimentos do dia" valor={String(dia.atendimento.totalHoje)} cor="#1d4ed8" />
         <MiniCard titulo="Realizados" valor={String(dia.atendimento.atendidos)} cor="var(--cor-sucesso)" />
         <MiniCard titulo="Faltas" valor={String(dia.atendimento.faltas)} cor="var(--cor-perigo)" />
@@ -175,7 +175,7 @@ function ResumoDoDia({ dia }: { dia: ResumoDia }) {
       </div>
 
       {dia.podeVerFinanceiro && dia.financeiro && (
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1rem" }}>
+        <div className="widget-grid" style={{ marginBottom: "1rem" }}>
           <MiniCard titulo="Recebido hoje" valor={formatarMoeda(dia.financeiro.recebidoHoje)} cor="var(--cor-sucesso)" />
           <MiniCard titulo="A receber hoje" valor={formatarMoeda(dia.financeiro.aReceberHoje)} cor="#d97706" />
           <MiniCard titulo="Despesas hoje" valor={formatarMoeda(dia.financeiro.despesasHoje)} cor="var(--cor-perigo)" />
@@ -225,9 +225,9 @@ function MiniCard({ titulo, valor, cor, link }: { titulo: string; valor: string;
     </>
   );
   return link ? (
-    <Link to={link} className="card" style={{ flex: 1, minWidth: 150, textDecoration: "none", color: "inherit" }}>{conteudo}</Link>
+    <Link to={link} className="widget-card widget-card-link" style={{ flex: 1, minWidth: 150, textDecoration: "none", color: "inherit" }}>{conteudo}</Link>
   ) : (
-    <div className="card" style={{ flex: 1, minWidth: 150 }}>{conteudo}</div>
+    <div className="widget-card" style={{ flex: 1, minWidth: 150 }}>{conteudo}</div>
   );
 }
 
@@ -239,7 +239,7 @@ function AvisosPainel({ avisos }: { avisos: AvisosDashboard }) {
   if (!temAlgo) return null;
 
   return (
-    <div className="card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid var(--cor-laranja)" }}>
+    <div className="card section-card" style={{ marginBottom: "1.25rem", borderLeft: "4px solid var(--cor-laranja)" }}>
       <h3 style={{ marginBottom: 12 }}>Avisos</h3>
       <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
         {avisos.aniversariantes.length > 0 && (
@@ -315,9 +315,9 @@ function CardPainel({
 }) {
   const cor = destaque ? "#d97706" : verde ? "var(--cor-sucesso)" : amarelo ? "#b45309" : vermelho ? "#b91c1c" : "var(--cor-primaria)";
   return (
-    <Link to={link} className="card" style={{ flex: 1, minWidth: 180, textDecoration: "none", color: "inherit" }}>
-      <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>{titulo}</div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: cor, marginTop: 6 }}>{valor}</div>
+    <Link to={link} className="widget-card widget-card-link" style={{ flex: 1, minWidth: 180, textDecoration: "none", color: "inherit" }}>
+      <div className="widget-label">{titulo}</div>
+      <div className="widget-value" style={{ color: cor }}>{valor}</div>
     </Link>
   );
 }

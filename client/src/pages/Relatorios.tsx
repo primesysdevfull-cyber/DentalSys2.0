@@ -31,7 +31,7 @@ export default function Relatorios() {
         <h2>Relatórios</h2>
       </div>
 
-      <div className="agenda-tabs" style={{ marginBottom: "1.25rem" }}>
+      <div className="agenda-tabs">
         <button className={`agenda-tab ${aba === "agenda" ? "ativo" : ""}`} onClick={() => setAba("agenda")}>
           Atendimentos
         </button>
@@ -72,14 +72,14 @@ function PeriodoFiltro({ inicio, fim, setInicio, setFim }: {
   setFim: (v: string) => void;
 }) {
   return (
-    <div style={{ display: "flex", gap: 12, alignItems: "flex-end", marginBottom: 16, flexWrap: "wrap" }}>
-      <div className="field" style={{ margin: 0 }}>
+    <div className="toolbar flex-wrap mt-1">
+      <div className="field">
         <label>De</label>
-        <input type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+        <input type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} className="input-compact" />
       </div>
-      <div className="field" style={{ margin: 0 }}>
+      <div className="field">
         <label>Até</label>
-        <input type="date" value={fim} onChange={(e) => setFim(e.target.value)} style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1" }} />
+        <input type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="input-compact" />
       </div>
     </div>
   );
@@ -151,8 +151,9 @@ function RelatorioAgendaTab() {
   return (
     <div>
       <PeriodoFiltro inicio={inicio} fim={fim} setInicio={setInicio} setFim={setFim} />
-      <button className="btn btn-primary btn-sm" onClick={exportar} disabled={!dados}>Exportar CSV</button>
-      <button className="btn btn-secondary btn-sm" onClick={() => {
+      <div className="toolbar" style={{ gap: 8 }}>
+        <button className="btn btn-primary btn-sm" onClick={exportar} disabled={!dados}>Exportar CSV</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => {
         if (!dados) return;
         imprimirRelatorio("Relatório de Atendimentos", ["Data", "Status", "Paciente", "Profissional", "Procedimento", "Sala", "Observações"], dados.agendamentos.map((a) => [
           new Date(a.dataHora).toLocaleString("pt-BR"),
@@ -164,13 +165,14 @@ function RelatorioAgendaTab() {
           a.observacoes,
         ]));
       }} disabled={!dados}>Imprimir PDF</button>
+      </div>
 
       {carregando ? (
-        <p style={{ marginTop: 12 }}>Carregando...</p>
+        <p className="mt-1">Carregando...</p>
       ) : dados ? (
         <>
           {dados.porStatus.length > 0 && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "12px 0" }}>
+            <div className="flex-wrap" style={{ margin: "12px 0" }}>
               {dados.porStatus.map((s) => (
                 <span key={s.status} className="status-cargo">{s.status}: {s._count._all}</span>
               ))}
@@ -179,7 +181,7 @@ function RelatorioAgendaTab() {
           {dados.agendamentos.length === 0 ? (
             <div className="aviso-vazio">Nenhum atendimento no período.</div>
           ) : (
-            <div style={{ overflowX: "auto", marginTop: 12 }}>
+            <div className="table-responsive mt-1">
               <table className="tabela-pacientes">
                 <thead>
                   <tr>
@@ -257,19 +259,21 @@ function RelatorioPacientesTab() {
   return (
     <div>
       <PeriodoFiltro inicio={inicio} fim={fim} setInicio={setInicio} setFim={setFim} />
-      <button className="btn btn-primary btn-sm" onClick={exportar}>Exportar CSV</button>
-      <button className="btn btn-secondary btn-sm" onClick={() => imprimirRelatorio(
+      <div className="toolbar" style={{ gap: 8 }}>
+        <button className="btn btn-primary btn-sm" onClick={exportar}>Exportar CSV</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => imprimirRelatorio(
         "Relatório de Pacientes",
         ["Nome", "CPF", "Telefone", "Email", "Convênio", "Status", "Cadastro"],
         pacientes.map((p) => [p.nome, p.cpf, p.telefone, p.email, p.convenio?.nome || "", p.status, new Date(p.criadoEm).toLocaleDateString("pt-BR")])
       )}>Imprimir PDF</button>
+      </div>
 
       {carregando ? (
-        <p style={{ marginTop: 12 }}>Carregando...</p>
+        <p className="mt-1">Carregando...</p>
       ) : pacientes.length === 0 ? (
-        <div className="aviso-vazio" style={{ marginTop: 12 }}>Nenhum paciente no período.</div>
+        <div className="aviso-vazio mt-1">Nenhum paciente no período.</div>
       ) : (
-        <div style={{ overflowX: "auto", marginTop: 12 }}>
+        <div className="table-responsive mt-1">
           <table className="tabela-pacientes">
             <thead>
               <tr>
@@ -356,18 +360,18 @@ function RelatorioFinanceiroTab() {
         ])
       )}>Imprimir PDF</button>
 
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "12px 0" }}>
-        <div className="card" style={{ flex: 1, minWidth: 160 }}>
-          <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>Recebido</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "var(--cor-sucesso)" }}>{formatarMoeda(totalReceita)}</div>
+      <div className="widget-grid">
+        <div className="card card-compact">
+          <div className="text-muted">Recebido</div>
+          <div className="font-strong text-success mt-1">{formatarMoeda(totalReceita)}</div>
         </div>
-        <div className="card" style={{ flex: 1, minWidth: 160 }}>
-          <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>A receber</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#d97706" }}>{formatarMoeda(totalPendente)}</div>
+        <div className="card card-compact">
+          <div className="text-muted">A receber</div>
+          <div className="font-strong text-warning mt-1">{formatarMoeda(totalPendente)}</div>
         </div>
-        <div className="card" style={{ flex: 1, minWidth: 160 }}>
-          <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>Despesas</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#b91c1c" }}>{formatarMoeda(totalDespesa)}</div>
+        <div className="card card-compact">
+          <div className="text-muted">Despesas</div>
+          <div className="font-strong text-danger mt-1">{formatarMoeda(totalDespesa)}</div>
         </div>
       </div>
 
@@ -376,7 +380,7 @@ function RelatorioFinanceiroTab() {
       ) : lancamentos.length === 0 ? (
         <div className="aviso-vazio">Nenhum lançamento no período.</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div className="table-responsive">
           <table className="tabela-pacientes">
             <thead>
               <tr>
@@ -385,7 +389,7 @@ function RelatorioFinanceiroTab() {
                 <th>Descrição</th>
                 <th>Forma</th>
                 <th>Status</th>
-                <th style={{ textAlign: "right" }}>Valor</th>
+                <th className="text-right">Valor</th>
               </tr>
             </thead>
             <tbody>
@@ -396,7 +400,7 @@ function RelatorioFinanceiroTab() {
                   <td>{l.descricao}</td>
                   <td>{l.formaPagamento ? FORMASPAG[l.formaPagamento] || l.formaPagamento : "—"}</td>
                   <td><span className="status-cargo">{l.status}</span></td>
-                  <td style={{ textAlign: "right", fontWeight: 600, color: l.tipo === "receita" ? "var(--cor-sucesso)" : "#b91c1c" }}>
+                  <td className={`text-right font-strong ${l.tipo === "receita" ? "text-success" : "text-danger"}`}>
                     {l.tipo === "receita" ? "+ " : "− "}{formatarMoeda(l.valor)}
                   </td>
                 </tr>
@@ -463,12 +467,12 @@ function RelatorioAnalisesTab() {
       }}>Imprimir PDF</button>
 
       {carregando ? (
-        <p style={{ marginTop: 12 }}>Carregando...</p>
+        <p className="mt-1">Carregando...</p>
       ) : !dados ? null : (
-        <div style={{ display: "grid", gap: "1.25rem", marginTop: "1rem" }}>
+        <div className="grid gap-1 mt-1">
           <div className="card">
-            <h3 style={{ marginBottom: 12 }}>Taxas de atendimento</h3>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <h3 className="mb-1">Taxas de atendimento</h3>
+            <div className="flex-wrap">
               <CartaoIndicador titulo="Realizados" valor={`${dados.atendimento.totalRealizados}`} cor="var(--cor-primaria)" />
               <CartaoIndicador titulo="Taxa de faltas" valor={`${dados.atendimento.taxaFaltas}%`} cor={dados.atendimento.taxaFaltas > 15 ? "#b91c1c" : "#d97706"} />
               <CartaoIndicador titulo="Taxa de confirmação" valor={`${dados.atendimento.taxaConfirmacao}%`} cor="var(--cor-sucesso)" />
@@ -478,16 +482,16 @@ function RelatorioAnalisesTab() {
 
           {dados.procedimentosMaisRealizados.length > 0 && (
             <div className="card">
-              <h3 style={{ marginBottom: 12 }}>Procedimentos mais realizados</h3>
+              <h3 className="mb-1">Procedimentos mais realizados</h3>
               <table className="tabela-pacientes">
                 <thead>
-                  <tr><th>Procedimento</th><th style={{ textAlign: "right" }}>Quantidade</th></tr>
+                  <tr><th>Procedimento</th><th className="text-right">Quantidade</th></tr>
                 </thead>
                 <tbody>
                   {dados.procedimentosMaisRealizados.map((p) => (
                     <tr key={p.nome}>
                       <td>{p.nome}</td>
-                      <td style={{ textAlign: "right", fontWeight: 600 }}>{p.quantidade}</td>
+                      <td className="text-right font-strong">{p.quantidade}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -497,16 +501,16 @@ function RelatorioAnalisesTab() {
 
           {dados.podeVerFinanceiro && dados.faturamentoPorProfissional.length > 0 && (
             <div className="card">
-              <h3 style={{ marginBottom: 12 }}>Faturamento por profissional</h3>
+              <h3 className="mb-1">Faturamento por profissional</h3>
               <table className="tabela-pacientes">
                 <thead>
-                  <tr><th>Profissional</th><th style={{ textAlign: "right" }}>Faturamento</th></tr>
+                  <tr><th>Profissional</th><th className="text-right">Faturamento</th></tr>
                 </thead>
                 <tbody>
                   {dados.faturamentoPorProfissional.map((p) => (
                     <tr key={p.nome}>
                       <td>{p.nome}</td>
-                      <td style={{ textAlign: "right", fontWeight: 600, color: "var(--cor-sucesso)" }}>{formatarMoeda(p.valor)}</td>
+                      <td className="text-right font-strong text-success">{formatarMoeda(p.valor)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -516,15 +520,15 @@ function RelatorioAnalisesTab() {
 
           {dados.retornosAtrasados.length > 0 && (
             <div className="card">
-              <h3 style={{ marginBottom: 12 }}>Retornos atrasados</h3>
+              <h3 className="mb-1">Retornos atrasados</h3>
               <div className="historico-cards">
                 {dados.retornosAtrasados.map((r) => (
                   <div className="card" key={r.id}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div className="card-header">
                       <b>{r.paciente || "Paciente"}</b>
                       <span className="status-inativo">Atrasado</span>
                     </div>
-                    <div style={{ fontSize: 13, color: "#475569", marginTop: 4 }}>
+                    <div className="text-muted mt-1">
                       {new Date(r.dataHora).toLocaleDateString("pt-BR")} • {r.profissional || "—"}
                     </div>
                   </div>
@@ -540,9 +544,9 @@ function RelatorioAnalisesTab() {
 
 function CartaoIndicador({ titulo, valor, cor }: { titulo: string; valor: string; cor: string }) {
   return (
-    <div className="card" style={{ flex: 1, minWidth: 150 }}>
-      <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>{titulo}</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: cor, marginTop: 6 }}>{valor}</div>
+    <div className="card card-compact">
+      <div className="text-muted">{titulo}</div>
+      <div className="font-strong" style={{ color: cor, marginTop: 6 }}>{valor}</div>
     </div>
   );
 }
