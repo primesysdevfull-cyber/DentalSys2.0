@@ -50,7 +50,7 @@ export default function Login() {
     <div
       className="login-container"
       style={{
-        ["--login-bg-url" as any]: `url('${import.meta.env.VITE_LOGIN_BG ?? "https://images.unsplash.com/photo-1536305030011-8f7b1c7f0d3a?q=80&w=1920&auto=format&fit=crop"}')`,
+        ["--login-bg-url" as any]: `url('${import.meta.env.VITE_LOGIN_BG ?? "/assets/login-bg.svg"}')`,
       } as React.CSSProperties}
     >
       <form className="login-box" onSubmit={enviar}>
