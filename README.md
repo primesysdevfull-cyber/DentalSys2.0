@@ -79,6 +79,31 @@ npm install
 npm run dev
 ```
 
+### Customizar imagem de fundo da tela de login
+
+Você pode sobrescrever a imagem de fundo da tela de login sem mudar código, usando a variável de ambiente `VITE_LOGIN_BG` no diretório `client/`.
+
+- Para usar uma imagem remota, crie `client/.env` com por exemplo:
+
+```bash
+VITE_LOGIN_BG=https://exemplo.com/minha-imagem.jpg
+```
+
+- Para usar uma imagem local, coloque o arquivo em `client/public/assets/` (ex.: `client/public/assets/login-bg.jpg`) e defina:
+
+```bash
+VITE_LOGIN_BG=/assets/login-bg.jpg
+```
+
+- Após alterar/criar `.env`, reinicie o servidor de desenvolvimento:
+
+```bash
+cd client
+npm run dev
+```
+
+O projeto já inclui um fallback (imagem pública) caso a variável não seja definida.
+
 ## Testes
 
 Após cada módulo, rodamos a suíte de testes:
