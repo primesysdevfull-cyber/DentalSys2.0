@@ -47,7 +47,12 @@ export default function Login() {
   }
 
   return (
-    <div className="login-container">
+    <div
+      className="login-container"
+      style={{
+        ["--login-bg-url" as any]: `url('${import.meta.env.VITE_LOGIN_BG ?? "https://images.unsplash.com/photo-1536305030011-8f7b1c7f0d3a?q=80&w=1920&auto=format&fit=crop"}')`,
+      } as React.CSSProperties}
+    >
       <form className="login-box" onSubmit={enviar}>
         <h1>DentalSys 2.0</h1>
         <p>
