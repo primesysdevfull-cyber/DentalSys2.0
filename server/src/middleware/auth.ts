@@ -53,6 +53,15 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   if (err instanceof Error && "issues" in (err as any)) {
     return res.status(400).json({ error: "Dados inválidos", detalhes: (err as any).issues });
   }
+  const prismaErr = err as any;
+  if (prismaErr?.code === "P2003") {
+    return res.status(409).json({
+      error: "Operação bloqueada: os dados possuem vínculos que impedem a ação.",
+    });
+  }
+  if (prismaErr?.code === "P2002") {
+    return res.status(409).json({ error: "Já existe um registro com esses dados (campo duplicado)" });
+  }
   console.error(err);
   res.status(500).json({ error: "Erro interno do servidor" });
 }

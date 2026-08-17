@@ -42,6 +42,9 @@ export async function criarNota(req: AuthRequest, res: Response) {
   if (dados.lancamentoId) {
     const lancamento = await prisma.lancamento.findFirst({ where: { id: dados.lancamentoId, clinicaId } });
     if (!lancamento) return res.status(404).json({ error: "Lançamento não encontrado" });
+    if (lancamento.pacienteId !== paciente.id) {
+      return res.status(400).json({ error: "O lançamento selecionado não pertence a este paciente" });
+    }
   }
   if (dados.agendamentoId) {
     const agendamento = await prisma.agendamento.findFirst({ where: { id: dados.agendamentoId, clinicaId } });

@@ -17,6 +17,7 @@ import {
   salvarIntegracao,
 } from "../services/notasfiscais";
 import { listarPacientes, Paciente } from "../services/pacientes";
+import { listarLancamentos, Lancamento } from "../services/financeiro";
 import { usePermissao } from "../context/PermissaoContext";
 import { formatarMoeda, mascaraMoeda, parseMoeda } from "../utils/mascaras";
 
@@ -36,6 +37,7 @@ const PROVIDER_LABEL: Record<string, string> = {
 
 const formVazio = {
   pacienteId: "",
+  lancamentoId: "",
   tipo: "nfs_e" as const,
   descricao: "",
   codigoServico: "",
@@ -55,6 +57,7 @@ export default function NotasFiscais() {
 
   const [notas, setNotas] = useState<NotaFiscal[]>([]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
   const [filtroStatus, setFiltroStatus] = useState("");
   const [form, setForm] = useState(formVazio);
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -83,6 +86,9 @@ export default function NotasFiscais() {
     listarPacientes()
       .then(setPacientes)
       .catch(() => setPacientes([]));
+    listarLancamentos({ status: "pago" })
+      .then(setLancamentos)
+      .catch(() => setLancamentos([]));
   }, []);
 
   useEffect(() => {
@@ -91,6 +97,7 @@ export default function NotasFiscais() {
     setForm((f) => ({
       ...f,
       pacienteId,
+      lancamentoId: "",
       valor: searchParams.get("valor") ? mascaraMoeda(searchParams.get("valor")!.replace(".", ",")) : f.valor,
       descricao: searchParams.get("descricao") || f.descricao,
       provedor: (searchParams.get("provedor") as ProvedorNota) || f.provedor,
@@ -102,11 +109,23 @@ export default function NotasFiscais() {
   const atualizar = (campo: keyof typeof formVazio, valor: string | boolean) =>
     setForm((f) => ({ ...f, [campo]: valor }));
 
+  const usarLancamento = (lancamentoId: string) => {
+    const l = lancamentos.find((x) => x.id === lancamentoId);
+    if (!l) return;
+    setForm((f) => ({
+      ...f,
+      lancamentoId,
+      valor: String(Number(l.valor) - Number(l.desconto)),
+      descricao: l.descricao,
+    }));
+  };
+
   async function cadastrar(e: FormEvent) {
     e.preventDefault();
     setErro("");
     const dados: NotaInput = {
       pacienteId: form.pacienteId,
+      lancamentoId: form.lancamentoId || null,
       tipo: form.tipo,
       descricao: form.descricao,
       codigoServico: form.codigoServico || null,
@@ -191,11 +210,33 @@ export default function NotasFiscais() {
           <div className="grid-2">
             <div className="field">
               <label>Paciente *</label>
-              <select required value={form.pacienteId} onChange={(e) => atualizar("pacienteId", e.target.value)}>
+              <select
+                required
+                value={form.pacienteId}
+                onChange={(e) => atualizar("pacienteId", e.target.value)}
+                onBlur={() => setForm((f) => ({ ...f, lancamentoId: "" }))}
+              >
                 <option value="">Selecione...</option>
                 {pacientes.map((p) => (
                   <option key={p.id} value={p.id}>{p.nome}</option>
                 ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Lançamento (preenche valor e descrição)</label>
+              <select
+                value={form.lancamentoId}
+                onChange={(e) => usarLancamento(e.target.value)}
+                disabled={!form.pacienteId}
+              >
+                <option value="">Nenhum</option>
+                {lancamentos
+                  .filter((l) => !form.pacienteId || l.paciente?.id === form.pacienteId)
+                  .map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.descricao} - {formatarMoeda(Number(l.valor) - Number(l.desconto))}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="field">
